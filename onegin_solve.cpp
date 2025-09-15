@@ -30,7 +30,29 @@ int pryamoy_razbor(FILE* stream) {
     return n_strings;
 }
 
+void pryamoy_check(char str1[], char str2[], int len) {
+    bool fl = false;
+    for (int i = 0; i < len; ++i) {
+
+        if ((!fl) && (str1[i] != str2[i])) {
+            if (str1[i] < str2[i]) {
+                return;
+            }
+            fl = true;
+        }
+
+        if (fl) {
+            char c = str1[i];
+            str1[i] = str2[i];
+            str2[i] = c;
+        }
+    }
+}
+
 bool check(char* str1, char* str2) {
+    my_assert(!str1, NULLPTR);
+    my_assert(!str2, NULLPTR);
+
     while (*str1 != '\0' && *str2 != '\0') {
         if (*str1 != *str2) {
             return *str1 > *str2;
@@ -39,6 +61,18 @@ bool check(char* str1, char* str2) {
         ++str2;
     }
     return (*str1 != '\0' && *str2 == '\0');
+}
+
+void bubble_sort(char* strings[], int n_strings) {
+    for (int i = 0; i < n_strings - 1; ++i) {
+        for (int j = 0; j < (n_strings - i - 1); ++j) {
+            if (check(strings[j], strings[j + 1])) {
+                char* str3 = strings[j];
+                strings[j] = strings[j + 1];
+                strings[j + 1] = str3;
+            }
+        }
+    }
 }
 
 int main() {
@@ -67,17 +101,9 @@ int main() {
 
     printf("%d strings, longest size is %d, extra symbols is %d\n", n_strings, max_len, extra_chars);
 
-    for (int i = 0; i < n_strings - 1; ++i) {
-        for (int j = 0; j < (n_strings - i - 1); ++j) {
-            if (check(strings[j], strings[j + 1])) {
-                char* str3 = strings[j];
-                strings[j] = strings[j + 1];
-                strings[j + 1] = str3;
-            }
-        }
-    }
+    bubble_sort(strings, n_strings);
 
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < 25; ++i) {
         my_puts(strings[i]);
     }
 
