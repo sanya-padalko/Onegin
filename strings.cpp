@@ -3,7 +3,7 @@
 void my_puts(const char* str) {
     my_assert(!str, NULLPTR);
 
-    while (*str != '\0')
+    while (*str != '\n')
         printf("%c", *str++);
     putchar('\n');
 }
