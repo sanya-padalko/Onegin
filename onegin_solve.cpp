@@ -1,66 +1,69 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <sys/stat.h>
 #include "errors.h"
 #include "strings.h"
+#include "utils.h"
 
-int pryamoy_razbor(FILE* stream) {
-    char strings[6043][203];
+struct stat file_stat;
 
-    size_t n = 0;
-    int i = 0;
+int get_size(char* file_name) {
+    my_assert(!file_name, NULLPTR);
+
+    my_assert(stat(file_name, &file_stat), FILE_ERR);
+
+    return file_stat.st_size;
+}
+
+int count_strings(char* buf, int file_size) {
+    my_assert(!buf, NULLPTR);
+    
     int n_strings = 0;
-    int max_len = 0;
-    int extra_chars = 0;
-
-    while (my_getline((char**)strings[i++], &n, stream) != -1) {
-        if (n == 1)
-            --i;
-        else
-            ++n_strings;
-
-        max_len = MAX(max_len, n);
-        extra_chars += 203 - n;
-
-        n = 0;
+    for (int i = 0; i < file_size; ++i) {
+        n_strings += (buf[i] == '\n');
     }
-
-    printf("%d strings, longest size is %d, extra symbols is %d\n", n_strings, max_len, extra_chars);
-
+    
     return n_strings;
 }
 
-void pryamoy_check(char str1[], char str2[], int len) {
-    bool fl = false;
-    for (int i = 0; i < len; ++i) {
-
-        if ((!fl) && (str1[i] != str2[i])) {
-            if (str1[i] < str2[i]) {
-                return;
-            }
-            fl = true;
-        }
-
-        if (fl) {
-            char c = str1[i];
-            str1[i] = str2[i];
-            str2[i] = c;
+void find_strings(char* buf, char** mas_point, STR* mas_str, int file_size) {
+    char* ptr = &buf[0];
+    int ind = 0;
+    *mas_point++ = ptr;
+    mas_str->start = ptr++;
+    for (int i = 1; i < file_size; ++i) {
+        if (*ptr++ == '\n') {
+            mas_str->len = ptr - mas_str->start;
+            ++mas_str;
+            mas_str->start = *mas_point++ = ptr;
         }
     }
+}
+
+void next(char** ptr) {
+    my_assert(!ptr, NULLPTR);
+    my_assert(!(*ptr), NULLPTR);
+
+    while (**ptr != '\n' && !isalpha(**ptr))
+        ++*ptr;
 }
 
 bool check(char* str1, char* str2) {
     my_assert(!str1, NULLPTR);
     my_assert(!str2, NULLPTR);
 
-    while (*str1 != '\0' && *str2 != '\0') {
+    next(&str1);
+    next(&str2);
+    
+    while (*str1 != '\n' && *str2 != '\n') {
         if (*str1 != *str2) {
             return *str1 > *str2;
         }
-        ++str1;
-        ++str2;
+        next(&(++str1));
+        next(&(++str2));
     }
-    return (*str1 != '\0' && *str2 == '\0');
+    return (*str1 != '\n' && *str2 == '\n');
 }
 
 void bubble_sort(char* strings[], int n_strings) {
@@ -75,69 +78,70 @@ void bubble_sort(char* strings[], int n_strings) {
     }
 }
 
-struct Node {
-    Node* nxt[123];
-    bool term;
-};
+int compar(const void* param1, const void* param2) { // все окей, ничего не выйдет за пределы
+    const STR* s1 = (STR*)param1;
+    const STR* s2 = (STR*)param2;
 
-void clear(Node* t) {
-    t->nxt[0] = 0;
-}
-
-void add(char* word, Node* root) {
-    printf("%d\n", root);
-    while (*word != '\0') {
-        if (!root->nxt[(int)*word]) {
-            root->nxt[(int)*word] = (Node*)calloc(1, sizeof(Node));
-            clear(root->nxt[(int)*word]);
+    if (s1->len <= 1) {
+        if (s2->len <= 1) {
+            return 0;
         }
-        root = root->nxt[(int)*word];
-        printf("%c %d\n", *word, (int*)root);
-        ++word;
+        return -1;
     }
-    root->term = true;
+
+    if (s2->len <= 1)
+        return 1;
+    
+    char* start1 = s1->start;
+    char* start2 = s2->start;
+
+    char* finish1 = start1 + s1->len - 2;
+    char* finish2 = start2 + s2->len - 2;
+
+    while (finish1 > start1 && finish2 > start2 && *finish1 == *finish2) {
+        --finish1;
+        --finish2;
+
+        while (finish1 > start1 && !isalpha(*finish1))
+            --finish1;
+
+        while (finish2 > start2 && !isalpha(*finish2))
+            --finish2;
+    }
+
+    if (*finish1 < *finish2) 
+        return -1;
+    else if (*finish1 > *finish2)
+        return 1;
+    else
+        return 0;
 }
 
-int main() { // осталось написать Бор
+int main() {
 
-    FILE* onegin = fopen("Onegin.txt", "r");
-    my_assert(!onegin, NULLPTR);
+    char* file_name   = "Onegin.txt";
 
-    char data[2][3];
-    
-    char* strings[6969];
+    int file_size = get_size(file_name);
 
-    size_t n = 0;
-    int i = 0;
-    int n_strings = 0;
-    int max_len = 0;
-    int extra_chars = 0;
+    char buf[file_size];
 
-    while (my_getline(&strings[i++], &n, onegin) != -1) {
-        if (n == 1 || !isalpha(strings[i - 1][0]))
-            --i;
-        else
-            ++n_strings;
+    input_file(buf, file_name, file_size);
 
-        max_len = MAX(max_len, n);
+    int n_strings = count_strings(buf, file_size); // неправильное количество строк
 
-        n = 0;
-    }
+    char* ps[n_strings];
+    STR mas_str[n_strings];
 
-    printf("%d strings, longest size is %d, extra symbols is %d\n", n_strings, max_len, extra_chars);
+    find_strings(buf, ps, mas_str, file_size);
 
-    //Node* root;
+    bubble_sort(ps, n_strings);
 
-    //printf("%d\n", root->nxt[0]);
+    qsort(mas_str, n_strings, sizeof(STR), &compar);
 
-    //add("popa", root);
+    for (int i = 0; i < 25; ++i)
+        my_puts(mas_str[i].start);
 
-    bubble_sort(strings, n_strings);
+    //output_file(buf, file_answer, file_size); // в конце мусор какой-то из-за неверного количества строк
 
-    for (int i = 0; i < 25; ++i) {
-        my_puts(strings[i]);
-    }
-
-    fclose(onegin);
-
+    // вывод оставшихся двух файлов
 }
