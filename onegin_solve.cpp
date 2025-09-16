@@ -75,10 +75,35 @@ void bubble_sort(char* strings[], int n_strings) {
     }
 }
 
-int main() {
+struct Node {
+    Node* nxt[123];
+    bool term;
+};
+
+void clear(Node* t) {
+    t->nxt[0] = 0;
+}
+
+void add(char* word, Node* root) {
+    printf("%d\n", root);
+    while (*word != '\0') {
+        if (!root->nxt[(int)*word]) {
+            root->nxt[(int)*word] = (Node*)calloc(1, sizeof(Node));
+            clear(root->nxt[(int)*word]);
+        }
+        root = root->nxt[(int)*word];
+        printf("%c %d\n", *word, (int*)root);
+        ++word;
+    }
+    root->term = true;
+}
+
+int main() { // осталось написать Бор
 
     FILE* onegin = fopen("Onegin.txt", "r");
     my_assert(!onegin, NULLPTR);
+
+    char data[2][3];
     
     char* strings[6969];
 
@@ -100,6 +125,12 @@ int main() {
     }
 
     printf("%d strings, longest size is %d, extra symbols is %d\n", n_strings, max_len, extra_chars);
+
+    //Node* root;
+
+    //printf("%d\n", root->nxt[0]);
+
+    //add("popa", root);
 
     bubble_sort(strings, n_strings);
 
