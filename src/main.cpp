@@ -1,7 +1,7 @@
-#include "inc/errors.h"
-#include "inc/utils.h"
-#include "inc/strings.h"
-#include "inc/sorting.h"
+#include "../inc/errors.h"
+#include "../inc/utils.h"
+#include "../inc/strings.h"
+#include "../inc/sorting.h"
 
 int main() {
 
