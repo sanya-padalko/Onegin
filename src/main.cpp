@@ -52,14 +52,10 @@ int main() {
         my_puts(mas_str[i].start, file_answer);
     }
 
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < 31; ++i) {
         my_puts("", file_answer);
-    }
-    
-    my_puts("---------------------------------------------------------------------------\n", file_answer);
-
-    for (int i = 0; i < 15; ++i) {
-        my_puts("", file_answer);
+        if (i == 15) 
+            my_puts("---------------------------------------------------------------------------\n", file_answer);
     }
 
     for (int i = 0; i < n_strings; ++i) {
