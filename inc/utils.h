@@ -12,16 +12,14 @@ struct STR {
     int len = 1;
 };
 
-void next(char** ptr);
+void next_ptr(char** ptr, ERRORS* code_error);
 
-void separate_strings(char* buf, char** mas_point, STR* mas_str, int file_size);
+void prev_ptr(char** ptr, char* stop);
 
-int get_file_size(char* file_name);
+int get_file_size(char* file_name, ERRORS* code_error);
 
-int count_strings(char* buf, int file_size);
+int count_strings(char* buf, int file_size, ERRORS* code_error);
 
-void input_file(char* buf, char* file_name, int file_size);
-
-void output_file(char* buf, char* file_name, int file_size);
+void separate_strings(char* buf, char** mas_point, STR* mas_str, int file_size, ERRORS* code_error);
 
 #endif // _UTILS_H
