@@ -1,21 +1,40 @@
 #include "../inc/sorting.h"
 
-int strcmp(char* str1, char* str2) {
-    my_assert(!str1, NULLPTR);
-    my_assert(!str2, NULLPTR);
+bool eq_char(char a, char b) {
+    if (isalpha(a))
+        a = tolower(a);
+    if (isalpha(b))
+        b = tolower(b);
+    return (a == b);
+}
 
-    next(&str1);
-    next(&str2);
+int comp_char(char a, char b) {
+    if (isalpha(a))
+        a = tolower(a);
+    if (isalpha(b))
+        b = tolower(b);
+    
+    if (a < b)
+        return -1;
+    else if (a > b)
+        return 1;
+    else 
+        return 0;
+}
+
+int str_compare(char* str1, char* str2, ERRORS* code_error) {
+    my_assert(str1, NULLPTR, 0);
+    my_assert(str2, NULLPTR, 0);
+
+    next_ptr(&str1, code_error);
+    next_ptr(&str2, code_error);
     
     while (*str1 != '\n' && *str2 != '\n') {
-        if (*str1 != *str2) {
-            if (*str1 > *str2) 
-                return 1;
-            else
-                return -1;
+        if (!eq_char(*str1, *str2)) {
+            return comp_char(*str1, *str2);
         }
-        next(&(++str1));
-        next(&(++str2));
+        next_ptr(&(++str1), code_error);
+        next_ptr(&(++str2), code_error);
     }
 
     if (*str1 == '\n' && *str2 == '\n') 
@@ -25,27 +44,29 @@ int strcmp(char* str1, char* str2) {
     return -1;
 }
 
-void bubble_sort(char** strings, int n_strings) {
-    for (int i = 0; i < n_strings - 1; ++i) {
-        for (int j = 0; j < (n_strings - i - 1); ++j) {
-            if (strcmp(strings[j], strings[j + 1]) == 1) {
-                char* str3 = strings[j];
-                strings[j] = strings[j + 1];
-                strings[j + 1] = str3;
+void strswap(char* &str1, char* &str2, ERRORS* code_error) {
+    my_assert(str1, NULLPTR, );
+    my_assert(str2, NULLPTR, );
+
+    char* str3 = str1;
+    str1 = str2;
+    str2 = str3;
+}
+
+void bubble_sort(char** strings, int n_strings, ERRORS* code_error) {
+    my_assert(strings, NULLPTR, );
+    my_assert(*strings, NULLPTR, );
+
+    for (int pass = 0; pass < n_strings - 1; ++pass) {
+        for (int i = 0; i < (n_strings - pass - 1); ++i) {
+            if (str_compare(strings[i], strings[i + 1], code_error) == 1) {
+                strswap(strings[i], strings[i + 1], code_error);
             }
         }
     }
 }
 
-bool eq_char(char a, char b) {
-    if (isalpha(a))
-        a = tolower(a);
-    if (isalpha(b))
-        b = tolower(b);
-    return (a == b);
-}
-
-int compar(const void* param1, const void* param2) {
+int reverse_compare(const void* param1, const void* param2) {
     const STR* s1 = (STR*)param1;
     const STR* s2 = (STR*)param2;
 
@@ -69,17 +90,10 @@ int compar(const void* param1, const void* param2) {
         --finish1;
         --finish2;
 
-        while (finish1 > start1 && !isalpha(*finish1))
-            --finish1;
+        prev_ptr(&finish1, start1);
 
-        while (finish2 > start2 && !isalpha(*finish2))
-            --finish2;
+        prev_ptr(&finish2, start2);
     }
 
-    if (*finish1 < *finish2) 
-        return -1;
-    else if (*finish1 > *finish2)
-        return 1;
-    else
-        return 0;
+    return comp_char(*finish1, *finish2);
 }
