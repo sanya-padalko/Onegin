@@ -6,6 +6,15 @@
 #include "sorting.h"
 #include "strings.h"
 
+struct File {
+    char* name = (char*)calloc(100, sizeof(char));
+    int file_size = 0;
+    char* buf = 0;
+    int n_strings = 0;
+    char** mas_point = 0;
+    STR* mas_str = 0;
+};
+
 void read_information(File* file_ptr, ERRORS* code_error);
 
 void print_information(File* file_ptr, ERRORS* code_error);
