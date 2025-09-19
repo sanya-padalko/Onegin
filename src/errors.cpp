@@ -1,12 +1,23 @@
 #include "../inc/errors.h"
 
-const char* err_msg[] = {"Everything is OK",
-                         "Working with a file went wrong",
-                         "Pointer went equal NULL",
-                         "Variable went equal NAN",
-                         "The digit didn't become finite"};
-
 void print_err_message(const char *file_name, const char* func_name, const int n_line,
                        const int error_code) {
-    fprintf(stderr, "\033[31m%s in %s, in fuction %s, in line %d\033[0m\n", err_msg[error_code], file_name, func_name, n_line);
+    switch(error_code) {
+        case FILE_ERR:
+            fprintf(stderr, RED_COLOR "Working with a file went wrong");
+            break;
+        case NULLPTR:
+            fprintf(stderr, RED_COLOR "Pointer went equal NULL");
+            break;
+        case NAN_ERR:
+            fprintf(stderr, RED_COLOR "Variable went equal NAN");
+            break;
+        case INFINITY_DIGIT:
+            fprintf(stderr, RED_COLOR "The digit didn't become finite");
+            break;
+        default:
+            fprintf(stderr, GREEN_COLOR "Everything is OK");
+    }
+    
+    fprintf(stderr, " in %s, in fuction %s, in line %d\n" RESET_COLOR, file_name, func_name, n_line);
 }
